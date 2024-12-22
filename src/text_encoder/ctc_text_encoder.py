@@ -3,7 +3,6 @@ from string import ascii_lowercase
 
 import torch
 
-# TODO add CTC decode
 # TODO add BPE, LM, Beam Search support
 # Note: think about metrics and encoder
 # The design can be remarkably improved
@@ -59,7 +58,16 @@ class CTCTextEncoder:
         return "".join([self.ind2char[int(ind)] for ind in inds]).strip()
 
     def ctc_decode(self, inds) -> str:
-        pass  # TODO
+        decoded = []
+        empty_idx = self.char2ind[self.EMPTY_TOK]
+        last_char_idx = empty_idx
+        for ind in inds:
+            if last_char_idx == ind:
+                continue
+            if ind != empty_idx:
+                decoded.append(self.ind2char[ind])
+            last_char_idx = ind
+        return "".join(decoded)
 
     @staticmethod
     def normalize_text(text: str):
