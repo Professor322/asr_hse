@@ -2,7 +2,7 @@ defaults:
   - model: deepspeech
   - writer: wandb
   - metrics: example
-  - datasets: example
+  - datasets: onebatchtest
   - dataloader: example
   - transforms: deepspeech_transforms
   - _self_
@@ -18,8 +18,13 @@ lr_scheduler:
   anneal_strategy: cos
 loss_function:
   _target_: src.loss.CTCLossWrapper
+  blank: ${text_encoder.pad_id}
 text_encoder:
-  _target_: src.text_encoder.CTCTextEncoder
+  _target_: src.text_encoder.BPETextEncoder
+  pad_id: 3
+  data_file_path: /home/kolek/Edu/audio_ml/hw2/data/datasets/librispeech/train-clean-100_index.json
+  vocab_file_path: /home/kolek/Edu/audio_ml/hw2/data/datasets/librispeech/train-clean-100_vocab.txt
+  sp_model_prefix: /home/kolek/Edu/audio_ml/hw2/data/datasets/librispeech/bpe_tokenizer
 trainer:
   log_step: 50
   n_epochs: 50

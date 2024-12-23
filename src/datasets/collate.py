@@ -50,7 +50,7 @@ def collate_fn(dataset_items: list[dict]):
         dataset_item["text_encoded"] = F.pad(
             dataset_item["text_encoded"],
             (0, max_length_encoded_text - dataset_item["text_encoded"].size(1)),
-            value=0,
+            value=dataset_item["encoded_text_pad_id"],
         ).squeeze(0)
 
     return default_collate(dataset_items)

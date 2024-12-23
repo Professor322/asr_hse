@@ -67,11 +67,13 @@ class BatchRNN(nn.Module):
         rnn_type=nn.GRU,
         bidirectional=False,
         batch_norm=True,
+        pad_id=0,
     ):
         super(BatchRNN, self).__init__()
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.bidirectional = bidirectional
+        self.pad_id = pad_id
         self.batch_norm = (
             SequenceWise(nn.BatchNorm1d(input_size)) if batch_norm else None
         )
@@ -91,7 +93,7 @@ class BatchRNN(nn.Module):
             x = self.batch_norm(x)
         x = nn.utils.rnn.pack_padded_sequence(x, output_lengths, enforce_sorted=False)
         x, h = self.rnn(x, h)
-        x, _ = nn.utils.rnn.pad_packed_sequence(x)
+        x, _ = nn.utils.rnn.pad_packed_sequence(x, padding_value=self.pad_id)
         if self.bidirectional:
             x = (
                 x.view(x.size(0), x.size(1), 2, -1)
@@ -142,11 +144,7 @@ class Lookahead(nn.Module):
 
 class DeepSpeech(nn.Module):
     def __init__(
-        self,
-        n_tokens: int,
-        hidden_size,
-        hidden_layers,
-        lookahead_context,
+        self, n_tokens: int, hidden_size, hidden_layers, lookahead_context, pad_id=0
     ):
         super().__init__()
         self.bidirectional = True
@@ -174,12 +172,14 @@ class DeepSpeech(nn.Module):
                 hidden_size=hidden_size,
                 bidirectional=self.bidirectional,
                 batch_norm=False,
+                pad_id=pad_id,
             ),
             *(
                 BatchRNN(
                     input_size=hidden_size,
                     hidden_size=hidden_size,
                     bidirectional=self.bidirectional,
+                    pad_id=pad_id,
                 )
                 for x in range(hidden_layers - 1)
             )

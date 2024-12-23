@@ -1,7 +1,11 @@
 import re
 from string import ascii_lowercase
-
+from sentencepiece import SentencePieceTrainer, SentencePieceProcessor
+import os
 import torch
+import pandas as pd
+import numpy as np
+
 
 # TODO add BPE, LM, Beam Search support
 # Note: think about metrics and encoder
@@ -9,10 +13,99 @@ import torch
 # to calculate stuff more efficiently and prettier
 
 
+class BPETextEncoder:
+    def __init__(
+        self,
+        data_file_path: str,
+        vocab_file_path: str,
+        sp_model_prefix: str = None,
+        vocab_size: int = 2000,
+        normalization_rule_name: str = "nmt_nfkc_cf",
+        model_type: str = "bpe",
+        pad_id=0,
+    ):
+        """
+        Dataset with texts, supporting BPE tokenizer
+        :param data_file: json of librispeech
+        :param train: whether to use train or validation split
+        :param sp_model_prefix: path prefix to save tokenizer model
+        :param vocab_size: sentencepiece tokenizer vocabulary size
+        :param normalization_rule_name: sentencepiece tokenizer normalization rule
+        :param model_type: sentencepiece tokenizer model type
+        :param max_length: maximal length of text in tokens
+        """
+        if not os.path.isfile(sp_model_prefix + ".model"):
+            if not os.path.isfile(vocab_file_path):
+                data = pd.read_json(data_file_path)
+                with open(vocab_file_path, "w") as file:
+                    file.write("\n".join(data["text"].to_list()))
+
+            # train tokenizer if not trained yet
+            SentencePieceTrainer.train(
+                input=vocab_file_path,
+                vocab_size=vocab_size,
+                model_type=model_type,
+                model_prefix=sp_model_prefix,
+                normalization_rule_name=normalization_rule_name,
+                pad_id=pad_id,
+            )
+        # load tokenizer from file
+        self.sp_model = SentencePieceProcessor(model_file=sp_model_prefix + ".model")
+
+    def encode(self, text) -> torch.Tensor:
+        text = self.normalize_text(text)
+        return torch.Tensor(self.sp_model.encode(text)).long().unsqueeze(0)
+
+    def decode(self, inds) -> str:
+        """
+        Raw decoding without CTC.
+        Used to validate the CTC decoding implementation.
+
+        Args:
+            inds (list): list of tokens.
+        Returns:
+            raw_text (str): raw text with empty tokens and repetitions.
+        """
+        if isinstance(inds, np.ndarray):
+            assert (
+                len(inds.shape) <= 2
+            ), "Expected tensor of shape (length, ) or (batch_size, length)"
+            inds = inds.tolist()
+        return self.sp_model.decode(inds)
+
+    def ctc_decode(self, inds) -> str:
+        if isinstance(inds, np.ndarray):
+            assert (
+                len(inds.shape) <= 2
+            ), "Expected tensor of shape (length, ) or (batch_size, length)"
+            inds = inds.tolist()
+
+        decoded = []
+        previous_token = self.sp_model.pad_id()
+        for ind in inds:
+            if ind != previous_token and ind != self.sp_model.pad_id():
+                decoded.append(self.sp_model.IdToPiece(ind))
+            previous_token = ind
+        print(decoded)
+        return "".join(decoded).replace("▁", " ").strip()
+
+    def get_pad_id(self):
+        return self.sp_model.pad_id()
+
+    def __len__(self):
+        return self.sp_model.vocab_size()
+
+    @staticmethod
+    def normalize_text(text: str):
+        text = text.lower()
+        text = re.sub(r"[^a-z ]", "", text)
+        return text
+
+
 class CTCTextEncoder:
     EMPTY_TOK = ""
 
-    def __init__(self, alphabet=None, **kwargs):
+    def __init__(self, alphabet=None, pad_id=0, **kwargs):
         """
         Args:
             alphabet (list): alphabet for language. If None, it will be
@@ -34,6 +127,9 @@ class CTCTextEncoder:
     def __getitem__(self, item: int):
         assert type(item) is int
         return self.ind2char[item]
+
+    def get_pad_id(self):
+        return self.char2ind[self.EMPTY_TOK]
 
     def encode(self, text) -> torch.Tensor:
         text = self.normalize_text(text)

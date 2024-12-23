@@ -100,6 +100,9 @@ class BaseDataset(Dataset):
         # transform spectrogram
         instance_data = self.preprocess_data(instance_data, "spectrogram")
 
+        # singal about pad_id
+        instance_data["encoded_text_pad_id"] = self.text_encoder.get_pad_id()
+
         return instance_data
 
     def __len__(self):
@@ -143,6 +146,9 @@ class BaseDataset(Dataset):
                 instance transform).
         """
         if self.instance_transforms is not None:
+            if data_to_preprocess not in self.instance_transforms:
+                return instance_data
+
             if data_to_preprocess == "audio":
                 instance_data[data_to_preprocess] = self.instance_transforms[
                     data_to_preprocess
