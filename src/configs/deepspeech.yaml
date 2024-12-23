@@ -2,9 +2,9 @@ defaults:
   - model: deepspeech
   - writer: wandb
   - metrics: example
-  - datasets: onebatchtest
+  - datasets: example
   - dataloader: example
-  - transforms: example_only_instance
+  - transforms: deepspeech_transforms
   - _self_
 optimizer:
   _target_: torch.optim.AdamW

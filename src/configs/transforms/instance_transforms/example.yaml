@@ -3,9 +3,22 @@ train:
     _target_: torchaudio.transforms.MelSpectrogram
     sample_rate: 16000
   audio: # name of the tensor on which we apply transform
+    _target_: audiomentations.Compose
+    transforms:
+      - _target_: audiomentations.Gain
+      - _target_: audiomentations.AddGaussianNoise
+        min_amplitude: 0.001
+        max_amplitude: 0.015
+        p: 0.5
+
+  spectrogram:
     _target_: torchvision.transforms.v2.Compose
     transforms:
-      - _target_: src.transforms.wav_augs.Gain
+      - _target_: torchaudio.transforms.FrequencyMasking
+        freq_mask_param: 20
+      - _target_: torchaudio.transforms.TimeMasking
+        time_mask_param: 100
+
 inference:
   get_spectrogram:
     _target_: torchaudio.transforms.MelSpectrogram
