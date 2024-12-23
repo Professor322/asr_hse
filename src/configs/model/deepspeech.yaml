@@ -1,8 +1,4 @@
 _target_: src.model.DeepSpeech
-n_feats: 128
-rnn_dim: 512
-droupout: 0.1
-stride: 2
-n_class: 28
-n_rnn_layers: 5
-n_cnn_layers: 3
+hidden_size: 512  # Hidden size of RNN Layer
+hidden_layers: 5  # Number of RNN layers
+lookahead_context: 20
