@@ -147,8 +147,6 @@ class DeepSpeech(nn.Module):
         hidden_size,
         hidden_layers,
         lookahead_context,
-        window_size,
-        sample_rate,
     ):
         super().__init__()
         self.bidirectional = True
