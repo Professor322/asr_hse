@@ -22,12 +22,12 @@ loss_function:
 text_encoder:
   _target_: src.text_encoder.BPETextEncoder
   pad_id: 3
-  data_file_path: /home/kolek/Edu/audio_ml/hw2/data/datasets/librispeech/train-clean-100_index.json
-  vocab_file_path: /home/kolek/Edu/audio_ml/hw2/data/datasets/librispeech/train-clean-100_vocab.txt
-  sp_model_prefix: /home/kolek/Edu/audio_ml/hw2/data/datasets/librispeech/bpe_tokenizer
+  data_file_path: /content/asr_hse/data/librispeech/train-clean-100_index.json
+  vocab_file_path: /content/asr_hse/data//data/datasets/librispeech/train-clean-100_vocab.txt
+  sp_model_prefix: /content/asr_hse/data//data/datasets/librispeech/bpe_tokenizer
 trainer:
   log_step: 50
-  n_epochs: 200
+  n_epochs: 400
   epoch_len: 400
   device_tensors: ["spectrogram", "text_encoded"] # which tensors should be on device (ex. GPU)
   resume_from: null # null or path to the checkpoint dir with *.pth and config.yaml
