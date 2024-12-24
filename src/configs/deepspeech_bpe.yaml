@@ -2,8 +2,8 @@ defaults:
   - model: deepspeech
   - writer: wandb
   - metrics: example
-  - datasets: train_clean_360
-  - dataloader: colab_training
+  - datasets: example
+  - dataloader: example
   - transforms: deepspeech_transforms
   - _self_
 optimizer:
@@ -27,8 +27,8 @@ text_encoder:
   sp_model_prefix: /home/kolek/Edu/audio_ml/hw2/data/datasets/librispeech/bpe_tokenizer
 trainer:
   log_step: 50
-  n_epochs: 200
-  epoch_len: 400
+  n_epochs: 400
+  epoch_len: 200
   device_tensors: ["spectrogram", "text_encoded"] # which tensors should be on device (ex. GPU)
   resume_from: null # null or path to the checkpoint dir with *.pth and config.yaml
   device: auto # device name or "auto"
