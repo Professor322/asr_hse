@@ -2,8 +2,8 @@ defaults:
   - model: deepspeech
   - writer: wandb
   - metrics: example
-  - datasets: onebatchtest
-  - dataloader: example
+  - datasets: train_clean_360
+  - dataloader: collab_training
   - transforms: deepspeech_transforms
   - _self_
 optimizer:
