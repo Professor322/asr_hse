@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 
 
-# TODO add BPE, LM, Beam Search support
+# TODO LM, Beam Search support
 # Note: think about metrics and encoder
 # The design can be remarkably improved
 # to calculate stuff more efficiently and prettier
@@ -86,7 +86,6 @@ class BPETextEncoder:
             if ind != previous_token and ind != self.sp_model.pad_id():
                 decoded.append(self.sp_model.IdToPiece(ind))
             previous_token = ind
-        print(decoded)
         return "".join(decoded).replace("▁", " ").strip()
 
     def get_pad_id(self):

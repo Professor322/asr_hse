@@ -20,15 +20,12 @@ loss_function:
   _target_: src.loss.CTCLossWrapper
   blank: ${text_encoder.pad_id}
 text_encoder:
-  _target_: src.text_encoder.BPETextEncoder
-  pad_id: 3
-  data_file_path: /home/kolek/Edu/audio_ml/hw2/data/datasets/librispeech/train-clean-100_index.json
-  vocab_file_path: /home/kolek/Edu/audio_ml/hw2/data/datasets/librispeech/train-clean-100_vocab.txt
-  sp_model_prefix: /home/kolek/Edu/audio_ml/hw2/data/datasets/librispeech/bpe_tokenizer
+  _target_: src.text_encoder.CTCTextEncoder
+  pad_id: 0
 trainer:
   log_step: 50
-  n_epochs: 50
-  epoch_len: 200
+  n_epochs: 400
+  epoch_len: 400
   device_tensors: ["spectrogram", "text_encoded"] # which tensors should be on device (ex. GPU)
   resume_from: null # null or path to the checkpoint dir with *.pth and config.yaml
   device: auto # device name or "auto"
