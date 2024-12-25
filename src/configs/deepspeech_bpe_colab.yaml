@@ -22,8 +22,8 @@ loss_function:
 text_encoder:
   _target_: src.text_encoder.BPETextEncoder
   pad_id: 3
-  data_file_path: /content/asr_hse/data/librispeech/train-clean-100_index.json
-  vocab_file_path: /content/asr_hse/data//data/datasets/librispeech/train-clean-100_vocab.txt
+  data_file_path: /content/asr_hse/data/librispeech/train-clean-360_index.json
+  vocab_file_path: /content/asr_hse/data//data/datasets/librispeech/train-clean-360_vocab.txt
   sp_model_prefix: /content/asr_hse/data//data/datasets/librispeech/bpe_tokenizer
 trainer:
   log_step: 50
