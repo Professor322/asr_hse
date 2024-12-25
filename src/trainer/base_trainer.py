@@ -137,6 +137,9 @@ class BaseTrainer:
         self.checkpoint_dir = (
             ROOT_PATH / config.trainer.save_dir / config.writer.run_name
         )
+        # get number of model params
+        params_num = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
+        self.logger.info(f"Number of model params: {params_num}")
 
         if config.trainer.get("resume_from") is not None:
             resume_path = self.checkpoint_dir / config.trainer.resume_from
