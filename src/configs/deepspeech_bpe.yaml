@@ -11,7 +11,7 @@ optimizer:
   lr: 3e-4
 lr_scheduler:
   _target_: torch.optim.lr_scheduler.OneCycleLR
-  max_lr: 1e-2
+  max_lr: 3e-3
   pct_start: 0.1
   steps_per_epoch: ${trainer.epoch_len}
   epochs: ${trainer.n_epochs}
@@ -22,6 +22,7 @@ loss_function:
 text_encoder:
   _target_: src.text_encoder.BPETextEncoder
   pad_id: 3
+  # TODO: this has to be fixed
   data_file_path: /home/kolek/Edu/audio_ml/hw2/data/datasets/librispeech/train-clean-100_index.json
   vocab_file_path: /home/kolek/Edu/audio_ml/hw2/data/datasets/librispeech/train-clean-100_vocab.txt
   sp_model_prefix: /home/kolek/Edu/audio_ml/hw2/data/datasets/librispeech/bpe_tokenizer
