@@ -2,18 +2,17 @@ defaults:
   - model: deepspeech
   - writer: wandb
   - metrics: example
-  - datasets: train_clean_360
-  - dataloader: colab_training
+  - datasets: example
+  - dataloader: example
   - transforms: deepspeech_transforms
   - _self_
 optimizer:
   _target_: torch.optim.AdamW
-  lr: 3e-4
+  lr: 3e-5
 lr_scheduler:
   _target_: torch.optim.lr_scheduler.OneCycleLR
-  max_lr: 1e-2
+  max_lr: 3e-4
   pct_start: 0.1
-  steps_per_epoch: ${trainer.epoch_len}
   epochs: ${trainer.n_epochs}
   anneal_strategy: cos
 loss_function:
@@ -23,11 +22,12 @@ text_encoder:
   _target_: src.text_encoder.CTCTextEncoder
   pad_id: 0
 trainer:
+  max_grad_norm:
   log_step: 50
   n_epochs: 400
   epoch_len: 400
   device_tensors: ["spectrogram", "text_encoded"] # which tensors should be on device (ex. GPU)
-  resume_from: null # null or path to the checkpoint dir with *.pth and config.yaml
+  resume_from: /home/kolek/Edu/audio_ml/hw2/saved/deepspeech # null or path to the checkpoint dir with *.pth and config.yaml
   device: auto # device name or "auto"
   override: True # if True, will override the previous run with the same name
   monitor: "min val_WER_(Argmax)" # "off" or "max/min metric_name", i.e. our goal is to maximize/minimize metric

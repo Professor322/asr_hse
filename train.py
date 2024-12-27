@@ -12,7 +12,7 @@ from src.utils.init_utils import set_random_seed, setup_saving_and_logging
 warnings.filterwarnings("ignore", category=UserWarning)
 
 
-@hydra.main(version_base=None, config_path="src/configs", config_name="deepspeech_bpe")
+@hydra.main(version_base=None, config_path="src/configs", config_name="deepspeech_char")
 def main(config):
     """
     Main script for training. Instantiates the model, optimizer, scheduler,
@@ -58,8 +58,6 @@ def main(config):
     # build optimizer, learning rate scheduler
     trainable_params = filter(lambda p: p.requires_grad, model.parameters())
     optimizer = instantiate(config.optimizer, params=trainable_params)
-    lr_scheduler = instantiate(config.lr_scheduler, optimizer=optimizer)
-
     # epoch_len = number of iterations for iteration-based training
     # epoch_len = None or len(dataloader) for epoch-based training
     epoch_len = config.trainer.get("epoch_len")
@@ -69,7 +67,7 @@ def main(config):
         criterion=loss_function,
         metrics=metrics,
         optimizer=optimizer,
-        lr_scheduler=lr_scheduler,
+        lr_scheduler_config=config.lr_scheduler,
         text_encoder=text_encoder,
         config=config,
         device=device,

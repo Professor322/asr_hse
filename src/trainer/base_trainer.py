@@ -4,6 +4,7 @@ import torch
 from numpy import inf
 from torch.nn.utils import clip_grad_norm_
 from tqdm.auto import tqdm
+from hydra.utils import instantiate
 
 from src.datasets.data_utils import inf_loop
 from src.metrics.tracker import MetricTracker
@@ -21,7 +22,7 @@ class BaseTrainer:
         criterion,
         metrics,
         optimizer,
-        lr_scheduler,
+        lr_scheduler_config,
         text_encoder,
         config,
         device,
@@ -71,7 +72,6 @@ class BaseTrainer:
         self.model = model
         self.criterion = criterion
         self.optimizer = optimizer
-        self.lr_scheduler = lr_scheduler
         self.text_encoder = text_encoder
         self.batch_transforms = batch_transforms
 
@@ -84,6 +84,12 @@ class BaseTrainer:
             # iteration-based training
             self.train_dataloader = inf_loop(self.train_dataloader)
             self.epoch_len = epoch_len
+
+        self.lr_scheduler = instantiate(
+            lr_scheduler_config,
+            optimizer=self.optimizer,
+            steps_per_epoch=self.epoch_len,
+        )
 
         self.evaluation_dataloaders = {
             k: v for k, v in dataloaders.items() if k != "train"
