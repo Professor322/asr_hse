@@ -42,6 +42,21 @@ class LibrispeechDataset(BaseDataset):
             index = self._get_or_load_index(part)
 
         super().__init__(index, *args, **kwargs)
+        # TODO handle train-all
+        data_file_path = (
+            ROOT_PATH / "data" / "datasets" / "librispeech" / f"{part}_index.json"
+        )
+        vocab_file_path = (
+            ROOT_PATH / "data" / "datasets" / "librispeech" / f"{part}_vocab.json"
+        )
+        sp_model_prefix = (
+            ROOT_PATH / "data" / "datasets" / "librispeech" / f"{part}_bpe_tokenizer"
+        )
+        self.text_encoder.setup(
+            data_file_path=str(data_file_path),
+            vocab_file_path=str(vocab_file_path),
+            sp_model_prefix=str(sp_model_prefix),
+        )
 
     def _load_part(self, part):
         arch_path = self._data_dir / f"{part}.tar.gz"

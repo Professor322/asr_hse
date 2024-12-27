@@ -21,10 +21,6 @@ loss_function:
 text_encoder:
   _target_: src.text_encoder.BPETextEncoder
   pad_id: 3
-  # TODO: this has to be fixed
-  data_file_path: /home/kolek/Edu/audio_ml/hw2/data/datasets/librispeech/train-clean-100_index.json
-  vocab_file_path: /home/kolek/Edu/audio_ml/hw2/data/datasets/librispeech/train-clean-100_vocab.txt
-  sp_model_prefix: /home/kolek/Edu/audio_ml/hw2/data/datasets/librispeech/bpe_tokenizer
 trainer:
   log_step: 50
   n_epochs: 400

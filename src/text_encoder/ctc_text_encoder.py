@@ -16,9 +16,6 @@ import numpy as np
 class BPETextEncoder:
     def __init__(
         self,
-        data_file_path: str,
-        vocab_file_path: str,
-        sp_model_prefix: str = None,
         vocab_size: int = 2000,
         normalization_rule_name: str = "nmt_nfkc_cf",
         model_type: str = "bpe",
@@ -34,7 +31,16 @@ class BPETextEncoder:
         :param model_type: sentencepiece tokenizer model type
         :param max_length: maximal length of text in tokens
         """
-        if not os.path.isfile(sp_model_prefix + ".model"):
+        self.model_type = model_type
+        self.vocab_size = vocab_size
+        self.normalization_rule_name = normalization_rule_name
+        self.pad_id = pad_id
+
+    def setup(self, data_file_path, vocab_file_path, sp_model_prefix):
+        self.model_path = sp_model_prefix + ".model"
+
+        # train if neccessary
+        if not os.path.isfile(self.model_path):
             if not os.path.isfile(vocab_file_path):
                 data = pd.read_json(data_file_path)
                 with open(vocab_file_path, "w") as file:
@@ -43,14 +49,14 @@ class BPETextEncoder:
             # train tokenizer if not trained yet
             SentencePieceTrainer.train(
                 input=vocab_file_path,
-                vocab_size=vocab_size,
-                model_type=model_type,
+                vocab_size=self.vocab_size,
+                model_type=self.model_type,
                 model_prefix=sp_model_prefix,
-                normalization_rule_name=normalization_rule_name,
-                pad_id=pad_id,
+                normalization_rule_name=self.normalization_rule_name,
+                pad_id=self.pad_id,
             )
         # load tokenizer from file
-        self.sp_model = SentencePieceProcessor(model_file=sp_model_prefix + ".model")
+        self.sp_model = SentencePieceProcessor(model_file=self.model_path)
 
     def encode(self, text) -> torch.Tensor:
         text = self.normalize_text(text)
@@ -139,6 +145,9 @@ class CTCTextEncoder:
             raise Exception(
                 f"Can't encode text '{text}'. Unknown chars: '{' '.join(unknown_chars)}'"
             )
+
+    def setup(self, data_file_path, vocab_file_path, sp_model_prefix):
+        pass
 
     def decode(self, inds) -> str:
         """
