@@ -1,16 +1,14 @@
 import re
-from string import ascii_lowercase
+from string import ascii_lowercase, ascii_uppercase
 from sentencepiece import SentencePieceTrainer, SentencePieceProcessor
 import os
 import torch
 import pandas as pd
 import numpy as np
+from pyctcdecode import build_ctcdecoder
 
 
-# TODO LM, Beam Search support
-# Note: think about metrics and encoder
-# The design can be remarkably improved
-# to calculate stuff more efficiently and prettier
+# TODO this can be desinged better, but who cares
 
 
 class BPETextEncoder:
@@ -118,13 +116,18 @@ class CTCTextEncoder:
         """
 
         if alphabet is None:
-            alphabet = list(ascii_lowercase + " ")
+            alphabet = list(ascii_uppercase + " ")
 
         self.alphabet = alphabet
         self.vocab = [self.EMPTY_TOK] + list(self.alphabet)
 
         self.ind2char = dict(enumerate(self.vocab))
         self.char2ind = {v: k for k, v in self.ind2char.items()}
+
+        self.ctc_decoder = build_ctcdecoder(
+            self.vocab,
+            kenlm_model_path="/home/kolek/Edu/audio_ml/hw2/3-gram.pruned.1e-7.arpa",
+        )
 
     def __len__(self):
         return len(self.vocab)
@@ -145,6 +148,9 @@ class CTCTextEncoder:
             raise Exception(
                 f"Can't encode text '{text}'. Unknown chars: '{' '.join(unknown_chars)}'"
             )
+
+    def ctc_decode_beam_search_lm(self, logits):
+        return self.ctc_decoder.decode(logits)
 
     def setup(self, data_file_path, vocab_file_path, sp_model_prefix):
         pass
@@ -175,6 +181,6 @@ class CTCTextEncoder:
 
     @staticmethod
     def normalize_text(text: str):
-        text = text.lower()
-        text = re.sub(r"[^a-z ]", "", text)
+        text = text.upper()
+        text = re.sub(r"[^A-Z ]", "", text)
         return text

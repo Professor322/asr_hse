@@ -224,6 +224,7 @@ class DeepSpeech(nn.Module):
         x = x.transpose(0, 1)
         return {
             "log_probs": F.log_softmax(x, dim=-1),
+            "logits": x,
             "log_probs_length": output_lengths,
         }
 
