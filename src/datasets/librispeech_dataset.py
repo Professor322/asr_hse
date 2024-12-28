@@ -50,7 +50,7 @@ class LibrispeechDataset(BaseDataset):
             ROOT_PATH / "data" / "datasets" / "librispeech" / f"{part}_vocab.json"
         )
         sp_model_prefix = (
-            ROOT_PATH / "data" / "datasets" / "librispeech" / f"{part}_bpe_tokenizer"
+            ROOT_PATH / "data" / "datasets" / "librispeech" / f"bpe_tokenizer"
         )
         self.text_encoder.setup(
             data_file_path=str(data_file_path),
