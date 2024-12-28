@@ -19,8 +19,8 @@ loss_function:
   _target_: src.loss.CTCLossWrapper
   blank: ${text_encoder.pad_id}
 text_encoder:
-  _target_: src.text_encoder.BPETextEncoder
-  pad_id: 3
+  _target_: src.text_encoder.CTCTextEncoder
+  pad_id: 0
 trainer:
   log_step: 50
   n_epochs: 400
