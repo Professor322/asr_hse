@@ -10,7 +10,7 @@ from tqdm import tqdm
 from src.datasets.base_dataset import BaseDataset
 from src.utils.io_utils import ROOT_PATH
 
-URL_LINKS = {
+URL_LINKS_DATA = {
     "dev-clean": "https://www.openslr.org/resources/12/dev-clean.tar.gz",
     "dev-other": "https://www.openslr.org/resources/12/dev-other.tar.gz",
     "test-clean": "https://www.openslr.org/resources/12/test-clean.tar.gz",
@@ -20,10 +20,17 @@ URL_LINKS = {
     "train-other-500": "https://www.openslr.org/resources/12/train-other-500.tar.gz",
 }
 
+URL_LINKS_LANGUAGE_MODELS = {
+    "3-gram.arpa": "https://www.openslr.org/resources/11/3-gram.arpa.gz",
+    "3-gram.pruned.1e-7.arpa": "https://www.openslr.org/resources/11/3-gram.pruned.1e-7.arpa.gz",
+    "3-gram.pruned.3e-7.arpa": "https://www.openslr.org/resources/11/3-gram.pruned.3e-7.arpa.gz",
+    "4-gram.arpa": "https://openslr.elda.org/resources/11/4-gram.arpa.gz",
+}
+
 
 class LibrispeechDataset(BaseDataset):
-    def __init__(self, part, data_dir=None, *args, **kwargs):
-        assert part in URL_LINKS or part == "train_all"
+    def __init__(self, part, data_dir=None, lm_model=None, *args, **kwargs):
+        assert part in URL_LINKS_DATA or part == "train_all"
 
         if data_dir is None:
             data_dir = ROOT_PATH / "data" / "datasets" / "librispeech"
@@ -33,7 +40,7 @@ class LibrispeechDataset(BaseDataset):
             index = sum(
                 [
                     self._get_or_load_index(part)
-                    for part in URL_LINKS
+                    for part in URL_LINKS_DATA
                     if "train" in part
                 ],
                 [],
@@ -43,25 +50,34 @@ class LibrispeechDataset(BaseDataset):
 
         super().__init__(index, *args, **kwargs)
         # TODO handle train-all
-        data_file_path = (
-            ROOT_PATH / "data" / "datasets" / "librispeech" / f"{part}_index.json"
-        )
-        vocab_file_path = (
-            ROOT_PATH / "data" / "datasets" / "librispeech" / f"{part}_vocab.json"
-        )
-        sp_model_prefix = (
-            ROOT_PATH / "data" / "datasets" / "librispeech" / f"bpe_tokenizer"
-        )
+        data_file_path = self._data_dir / f"{part}_index.json"
+        vocab_file_path = self._data_dir / f"{part}_vocab.json"
+        sp_model_prefix = self._data_dir / f"bpe_tokenizer"
+
+        lm_model_path = str(self._data_dir / lm_model)
+        # check if model is already downloaded
+        if not os.path.isfile(lm_model_path):
+            lm_model_path = None
+
+        # if it is not downloaded, then download it
+        if lm_model is not None and lm_model_path is None:
+            lm_model_arch_path = self._data_dir / f"{lm_model}.gz"
+            wget.download(URL_LINKS_LANGUAGE_MODELS[lm_model], str(lm_model_arch_path))
+            os.system(f"gunzip {lm_model_arch_path}")
+            os.remove(str(lm_model_arch_path))
+            lm_model_path = str(self._data_dir / lm_model)
+
         self.text_encoder.setup(
             data_file_path=str(data_file_path),
             vocab_file_path=str(vocab_file_path),
             sp_model_prefix=str(sp_model_prefix),
+            lm_model_path=lm_model_path,
         )
 
     def _load_part(self, part):
         arch_path = self._data_dir / f"{part}.tar.gz"
         print(f"Loading part {part}")
-        wget.download(URL_LINKS[part], str(arch_path))
+        wget.download(URL_LINKS_DATA[part], str(arch_path))
         shutil.unpack_archive(arch_path, self._data_dir)
         for fpath in (self._data_dir / "LibriSpeech").iterdir():
             shutil.move(str(fpath), str(self._data_dir / fpath.name))

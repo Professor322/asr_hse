@@ -124,11 +124,6 @@ class CTCTextEncoder:
         self.ind2char = dict(enumerate(self.vocab))
         self.char2ind = {v: k for k, v in self.ind2char.items()}
 
-        self.ctc_decoder = build_ctcdecoder(
-            self.vocab,
-            kenlm_model_path="/home/kolek/Edu/audio_ml/hw2/3-gram.pruned.1e-7.arpa",
-        )
-
     def __len__(self):
         return len(self.vocab)
 
@@ -152,8 +147,8 @@ class CTCTextEncoder:
     def ctc_decode_beam_search_lm(self, logits):
         return self.ctc_decoder.decode(logits)
 
-    def setup(self, data_file_path, vocab_file_path, sp_model_prefix):
-        pass
+    def setup(self, data_file_path, vocab_file_path, sp_model_prefix, lm_model_path):
+        self.ctc_decoder = build_ctcdecoder(self.vocab, kenlm_model_path=lm_model_path)
 
     def decode(self, inds) -> str:
         """
