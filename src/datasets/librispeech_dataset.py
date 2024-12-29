@@ -60,9 +60,11 @@ class LibrispeechDataset(BaseDataset):
             # if it is not downloaded, then download it
             if not os.path.isfile(lm_model_path):
                 lm_model_arch_path = self._data_dir / f"{lm_model}.gz"
+                print(f"Downloading model {lm_model}...")
                 wget.download(
                     URL_LINKS_LANGUAGE_MODELS[lm_model], str(lm_model_arch_path)
                 )
+                print(f"Unziping model...")
                 os.system(f"gunzip {lm_model_arch_path}")
                 os.remove(str(lm_model_arch_path))
 
