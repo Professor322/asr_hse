@@ -77,3 +77,9 @@ This repository is based on a [PyTorch Project Template](https://github.com/Blin
 ## License
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
+
+## To download best model use
+
+```
+gdown https://drive.google.com/uc\?id\=1-VTff8NcIqxg7wVHARX7GxR-ix92SUVp
+```

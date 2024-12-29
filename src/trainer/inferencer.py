@@ -123,8 +123,7 @@ class Inferencer(BaseTrainer):
                 the dataloader (possibly transformed via batch transform)
                 and model outputs.
         """
-        # TODO change inference logic so it suits ASR assignment
-        # and task pipeline
+        # TODO performance can be improved here
 
         batch = self.move_batch_to_device(batch)
         batch = self.transform_batch(batch)  # transform batch on device -- faster
@@ -136,15 +135,8 @@ class Inferencer(BaseTrainer):
             for met in self.metrics["inference"]:
                 metrics.update(met.name, met(**batch))
 
-        # argmax_inds = batch['log_probs'].cpu().argmax(-1).numpy()
-        # argmax_inds = [
-        # inds[: int(ind_len)]
-        #     for inds, ind_len in zip(argmax_inds, batch['log_probs_length'].numpy())
-        # ]
-        # argmax_texts_raw = [self.text_encoder.decode(inds) for inds in argmax_inds]
-        # argmax_texts = [self.text_encoder.ctc_decode(inds) for inds in argmax_inds]
-        # rows = {}
-        # tuples = list(zip(argmax_texts, batch['text'], argmax_texts_raw, batch['audio_path']))
+        #  rows = {}
+        # # tuples = list(zip(argmax_texts, batch['text'], argmax_texts_raw, batch['audio_path']))
         # for pred, target, raw_pred, audio_path in tuples:
         #     target = self.text_encoder.normalize_text(target)
         #     wer = calc_wer(target, pred) * 100
