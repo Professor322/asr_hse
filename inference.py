@@ -2,6 +2,7 @@ import warnings
 
 import hydra
 import torch
+import pandas as pd
 from hydra.utils import instantiate
 
 from src.datasets.data_utils import get_dataloaders
@@ -70,6 +71,7 @@ def main(config):
         for key, value in logs[part].items():
             full_key = part + "_" + key
             print(f"    {full_key:15s}: {value}")
+    pd.DataFrame.from_dict(logs).to_csv(str(save_path / "metrics.csv"))
 
 
 if __name__ == "__main__":

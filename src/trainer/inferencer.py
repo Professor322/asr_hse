@@ -73,7 +73,10 @@ class Inferencer(BaseTrainer):
         # path definition
 
         self.save_path = save_path
-        os.remove(str(self.save_path / "predictions.csv"))
+        self.predictions_path = self.save_path / "predictions.csv"
+        # delete previous predictions files
+        if os.path.isfile(str(self.predictions_path)):
+            os.remove(str(self.predictions_path))
 
         # define metrics
         self.metrics = metrics
