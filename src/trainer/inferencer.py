@@ -1,7 +1,8 @@
 import torch
+import pandas as pd
 from tqdm.auto import tqdm
 from pathlib import Path
-
+import os
 
 from src.metrics.tracker import MetricTracker
 from src.trainer.base_trainer import BaseTrainer
@@ -72,6 +73,7 @@ class Inferencer(BaseTrainer):
         # path definition
 
         self.save_path = save_path
+        os.remove(str(self.save_path / "predictions.csv"))
 
         # define metrics
         self.metrics = metrics
@@ -135,20 +137,30 @@ class Inferencer(BaseTrainer):
             for met in self.metrics["inference"]:
                 metrics.update(met.name, met(**batch))
 
-        #  rows = {}
-        # # tuples = list(zip(argmax_texts, batch['text'], argmax_texts_raw, batch['audio_path']))
-        # for pred, target, raw_pred, audio_path in tuples:
-        #     target = self.text_encoder.normalize_text(target)
-        #     wer = calc_wer(target, pred) * 100
-        #     cer = calc_cer(target, pred) * 100
+        predictions = []
+        for idx, logits in enumerate(batch["logits"]):
+            logits_numpy = (
+                logits[: batch["log_probs_length"][idx]].detach().cpu().numpy()
+            )
+            predictions.append(
+                self.text_encoder.ctc_decode_beam_search_lm(logits_numpy)
+            )
+        rows = {}
+        tuples = list(zip(predictions, batch["text"], batch["audio_path"]))
+        for pred, target, audio_path in tuples:
+            target = self.text_encoder.normalize_text(target)
+            wer = calc_wer(target, pred) * 100
+            cer = calc_cer(target, pred) * 100
 
-        #     rows[Path(audio_path).name] = {
-        #         "target": target,
-        #         "raw prediction": raw_pred,
-        #         "predictions": pred,
-        #         "wer": wer,
-        #         "cer": cer,
-        #     }
+            rows[Path(audio_path).name] = {
+                "target": target,
+                "predictions": pred,
+                "wer": wer,
+                "cer": cer,
+            }
+        pd.DataFrame.from_dict(rows).to_csv(
+            str(self.save_path / "predictions.csv"), mode="a"
+        )
 
         return batch
 
