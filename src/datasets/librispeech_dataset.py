@@ -54,18 +54,17 @@ class LibrispeechDataset(BaseDataset):
         vocab_file_path = self._data_dir / f"{part}_vocab.json"
         sp_model_prefix = self._data_dir / f"bpe_tokenizer"
 
-        lm_model_path = str(self._data_dir / lm_model)
-        # check if model is already downloaded
-        if not os.path.isfile(lm_model_path):
-            lm_model_path = None
-
-        # if it is not downloaded, then download it
-        if lm_model is not None and lm_model_path is None:
-            lm_model_arch_path = self._data_dir / f"{lm_model}.gz"
-            wget.download(URL_LINKS_LANGUAGE_MODELS[lm_model], str(lm_model_arch_path))
-            os.system(f"gunzip {lm_model_arch_path}")
-            os.remove(str(lm_model_arch_path))
+        lm_model_path = None
+        if lm_model is not None:
             lm_model_path = str(self._data_dir / lm_model)
+            # if it is not downloaded, then download it
+            if not os.path.isfile(lm_model_path):
+                lm_model_arch_path = self._data_dir / f"{lm_model}.gz"
+                wget.download(
+                    URL_LINKS_LANGUAGE_MODELS[lm_model], str(lm_model_arch_path)
+                )
+                os.system(f"gunzip {lm_model_arch_path}")
+                os.remove(str(lm_model_arch_path))
 
         self.text_encoder.setup(
             data_file_path=str(data_file_path),
