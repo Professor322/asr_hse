@@ -1,4 +1,4 @@
-# Automatic Speech Recognition (ASR) with PyTorch
+# Automatic Speech Recognition (ASR)
 
 <p align="center">
   <a href="#about">About</a> •
@@ -9,10 +9,18 @@
 </p>
 
 ## About
+This repository is an attempt to train an ASR model. Trained model is able to achieve **23%** WER and **10%** CER on `test-clean` dataset, leveraging beam search and language model guidance. Underlying model uses [deepspeech2](https://arxiv.org/abs/1512.02595).
+```bash
+val_CER_(Argmax): 0.15835317756054224
+val_WER_(Argmax): 0.44245870354749056
+val_CER_(BeamSearchLM): 0.1086015791507941
+val_WER_(BeamSearchLM): 0.2379445747889793
+```
+Follow the steps desribed in "How to use" section to run inference on the best model to reproduce stated results, or run training to create the model with the same performance.
 
-This repository contains a template for solving ASR task with PyTorch. This template branch is a part of the [HSE DLA course](https://github.com/markovka17/dla) ASR homework. Some parts of the code are missing (or do not follow the most optimal design choices...) and students are required to fill these parts themselves (as well as writing their own models, etc.).
+[Link to wandb artifcats](https://wandb.ai/professor322/asr_model/workspace)
 
-See the task assignment [here](https://github.com/markovka17/dla/tree/2024/hw1_asr).
+Full report can be found [here](ASR_Report.pdf)
 
 ## Installation
 
@@ -53,21 +61,27 @@ Follow these steps to install the project:
    ```bash
    pre-commit install
    ```
+3. Also make sure that `gzip` utility is installed
 
 ## How To Use
 
 To train a model, run the following command:
 
 ```bash
-python3 train.py -cn=CONFIG_NAME HYDRA_CONFIG_ARGUMENTS
+python3 train.py -cn=deepspeech_char_colab.yaml trainer.save_dir="saved"
 ```
 
-Where `CONFIG_NAME` is a config from `src/configs` and `HYDRA_CONFIG_ARGUMENTS` are optional arguments.
+To reproduce the stated results
+
+To download model that achieves stated result use this command
+```bash
+gdown https://drive.google.com/uc\?id\=1-VTff8NcIqxg7wVHARX7GxR-ix92SUVp
+```
 
 To run inference (evaluate the model or save predictions):
 
 ```bash
-python3 inference.py HYDRA_CONFIG_ARGUMENTS
+python3 python3 inference.py -cn=inference.yaml inferencer.from_pretrained=<path_to_downloaded_model>
 ```
 
 ## Credits
@@ -77,9 +91,3 @@ This repository is based on a [PyTorch Project Template](https://github.com/Blin
 ## License
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
-
-## To download best model use
-
-```
-gdown https://drive.google.com/uc\?id\=1-VTff8NcIqxg7wVHARX7GxR-ix92SUVp
-```
