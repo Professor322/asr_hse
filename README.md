@@ -75,10 +75,11 @@ To reproduce the stated results
 
 To download model that achieves stated result use this command
 ```bash
-gdown https://drive.google.com/uc\?id\=1-VTff8NcIqxg7wVHARX7GxR-ix92SUVp
+gdown https://drive.google.com/uc\?id\=1Ook3vMZV9c7D-TMen6GjIBKWzaAQnwHR
 ```
 
 To run inference (evaluate the model or save predictions):
+Specified LM model will be downloaded automatically
 
 ```bash
 python3 python3 inference.py -cn=inference.yaml inferencer.from_pretrained=<path_to_downloaded_model>

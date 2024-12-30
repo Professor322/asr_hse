@@ -64,9 +64,10 @@ class LibrispeechDataset(BaseDataset):
                 wget.download(
                     URL_LINKS_LANGUAGE_MODELS[lm_model], str(lm_model_arch_path)
                 )
-                print(f"Unziping model...")
+                print(f"\nUnzipping model...")
                 os.system(f"gunzip {lm_model_arch_path}")
-                os.remove(str(lm_model_arch_path))
+                if os.path.isfile(str(lm_model_arch_path)):
+                    os.remove(str(lm_model_arch_path))
 
         self.text_encoder.setup(
             data_file_path=str(data_file_path),
